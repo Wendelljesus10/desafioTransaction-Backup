@@ -1,0 +1,35 @@
+-- TRANSAÇÕES --
+CODE 2
+
+-- Essa primeira transação pode ser executada sem utilizar outros recursos como procedures.
+Dessa forma, você irá executar statements de consultas e modificações de dados persistidos no banco de dados via transações.   --
+
+-- PROCEDURE DE CADASTRO DE NOVOS PRODUTOS ACIMA DE 13 JÁ IMBUTIDOS NO SISTEMA, CASO AO CONTRÁRIO, ENTRA NO ERRO E A TRANSAÇÃO NÃO COMMITA --
+
+delimiter \\
+create procedure insert_procedure(
+in produto_id_p int,
+in nome_p varchar(50),
+in categoria_p enum('Vestuário','Tênis','Acessório'),
+in tamanho_p varchar(5),
+in valor_p float,
+in descricão_p varchar(80)
+)
+begin 
+	DECLARE EXIT HANDLER FOR sqlexception
+begin
+        select 'Erro durante a transação' AS Resultado;
+        rollback;
+	END;
+if (produto_id_p > 13) then
+insert into produto (produto_id,nome,categoria,tamanho,valor,descrição) values (produto_id_p,nome_p,categoria_p,tamanho_p,valor_p,descricão_p);
+select 'Produto inserido' as Message;
+select * from produto;
+else
+select 'Já inserido' as Message;
+end if;
+commit;
+end \\
+delimiter ;
+
+call insert_procedure(29, 'Samba','Tênis','42','1000',null);
